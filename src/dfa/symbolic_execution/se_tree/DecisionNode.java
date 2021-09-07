@@ -1,4 +1,4 @@
-package se_tree;
+package symbolic_execution.se_tree;
 
 import ast.*;
 

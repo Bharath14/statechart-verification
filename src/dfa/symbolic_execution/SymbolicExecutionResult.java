@@ -1,13 +1,14 @@
 package symbolic_execution;
 
 import ast.*;
+import set.SETNode;
 
 import java.util.List;
 
 public class SymbolicExecutionResult{
     
-    private final List<SETNode> done;
-    private final List<SETNode> live;
+    private  List<SETNode> done;
+    private  List<SETNode> live;
 
     public SymbolicExecutionResult(){
         
@@ -15,11 +16,11 @@ public class SymbolicExecutionResult{
 
 
 
-    public static getDoneNodes(){
+    public List<SETNode> getDoneNodes(){
         return done;
     }
 
-    public static getLiveNodes(){
+    public List<SETNode> getLiveNodes(){
         return live;
     }
 }
