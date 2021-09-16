@@ -4,9 +4,10 @@ import ast.*;
 
 public class TransitionNode extends SETNode{
     
-    public final ast.State;
+    public final State s;
 
-    public TransitionNode(){
-    
+    public TransitionNode(State s, SETNode leaf){
+        super(leaf);
+        this.s = s;
     }
 }

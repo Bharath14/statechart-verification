@@ -1,12 +1,14 @@
 package symbolic_execution.se_tree;
 
-import ast.*;
+//import ast.*;
 
 public class SETNode{
     
     public final SETNode parent;
+    public Integer depth = 0;
 
-    public SETNode(){
-    
+    public SETNode(SETNode parent){
+        this.parent = parent;
+        depth = parent.depth+1;
     }
 }

@@ -4,10 +4,11 @@ import ast.*;
 
 public class StateEntryNode extends SETNode{
     
-    public final ast.State;
+    public final State s;
     
-    public StateEntryNode(){
-    
+    public StateEntryNode(State s, SETNode leaf){
+        super(leaf);
+        this.s = s;
     }
 }
 

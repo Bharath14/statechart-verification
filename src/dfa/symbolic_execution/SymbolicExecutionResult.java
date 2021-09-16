@@ -1,7 +1,6 @@
 package symbolic_execution;
 
-import ast.*;
-import set.SETNode;
+import symbolic_execution.se_tree.SETNode;
 
 import java.util.List;
 
@@ -22,5 +21,14 @@ public class SymbolicExecutionResult{
 
     public List<SETNode> getLiveNodes(){
         return live;
+    }
+
+    public void setDoneNodes(List<SETNode> d)
+    {
+        done = d;
+    }
+    public void setLiveNodes(List<SETNode> l)
+    {
+        live = l;
     }
 }

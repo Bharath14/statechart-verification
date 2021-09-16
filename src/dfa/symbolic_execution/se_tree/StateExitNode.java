@@ -4,9 +4,10 @@ import ast.*;
 
 public class StateExitNode extends SETNode{
     
-    public final ast.State;
+    public final State s;
 
-    public StateExitNode(){
-    
+    public StateExitNode(State s, SETNode leaf){
+        super(leaf);
+        this.s = s;
     }
 }
