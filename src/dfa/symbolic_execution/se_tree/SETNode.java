@@ -9,6 +9,10 @@ public class SETNode{
 
     public SETNode(SETNode parent){
         this.parent = parent;
-        depth = parent.depth+1;
+        if(parent != null)
+        {
+            this.depth = parent.depth+1;
+        }
     }
-}
+
+} 

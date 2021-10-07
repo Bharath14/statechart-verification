@@ -14,7 +14,7 @@ ${FE}/Lexer.java : ${FE}/lexer.flex
 	java -jar ${MYLIBPATH}/JFlex-1.4.1.jar ${FE}/lexer.flex
 
 test : ${FE}/Lexer.java sym.java ast/*.java program/*.java
-	javac -Xlint:-unchecked -d classes *.java ast/*.java program/*.java metric/*.java testcases/*.java -cp ${MYLIBPATH}/java-cup-11a.jar:${MYLIBPATH}/jflex-1.4.1.jar:${MYLIBPATH}/junit-4.8.1.jar:ast:classes:./;
+	javac -Xlint:-unchecked -d classes ast/*.java program/*.java metric/*.java testcases/*.java *.java -cp ${MYLIBPATH}/java-cup-11a.jar:${MYLIBPATH}/jflex-1.4.1.jar:${MYLIBPATH}/junit-4.8.1.jar:ast:classes:./;
 
 rt :
 	java -cp ~/My-Downloads/junit-4.8.1.jar:classes/:${MYCLASSPATH}:. org.junit.runner.JUnitCore testcases.${testcase}

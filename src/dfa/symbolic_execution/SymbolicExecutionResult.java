@@ -12,9 +12,6 @@ public class SymbolicExecutionResult{
     public SymbolicExecutionResult(){
         
     }
-
-
-
     public List<SETNode> getDoneNodes(){
         return done;
     }
