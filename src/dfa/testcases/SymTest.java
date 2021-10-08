@@ -28,8 +28,9 @@ import ast.Transition;
 import ast.Environment;
 import ast.Declaration;
 import ast.Name;
+import ast.Type;
 import symbolic_execution.se_tree.*;
-//import symbolic_execution.SymbolicExecutionEngine;
+import symbolic_execution.SymbolicExecutionEngine;
 import symbolic_execution.SymbolicExecutionResult;
 
 public class SymTest{
@@ -102,6 +103,8 @@ public class SymTest{
     System.out.println(done.get(0).depth);
     System.out.println(done.get(1).depth);
     */
+    SymbolicExecutionEngine symbolictest = new SymbolicExecutionEngine(statechart, 200);
+    symbolictest.execute();
 
   }
 
