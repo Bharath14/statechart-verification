@@ -6,7 +6,8 @@ import java.util.HashMap;
 
 public class SymbolicExpression extends Expression
 {
-    public final Expression left;
+  public final Expression left;
+  public final Expression expression;
   public final Expression right;
 
   public final String operator;
@@ -49,12 +50,13 @@ public class SymbolicExpression extends Expression
     this.left     = left;
     this.right    = right;
     this.operator = operator;
+    this.expression = null;
   }
-
-    public final Expression expression;
 
   public SymbolicExpression(Expression expression, String operator) {
     this.expression = expression;
     this.operator   = operator;
+    this.left = null;
+    this.right = null;
   }
 }

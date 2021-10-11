@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class DecisionNode extends SETNode{
     
-    public final ast.Expression;
+    //public final ast.Expression;
     public SymbolicExpression value;
     
     public DecisionNode(SymbolicExpression value, SETNode leaf){
