@@ -12,6 +12,7 @@ import symbolic_execution.SymbolicExecutionResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.lang.reflect.Method;
+import java.io.IOException;
 
 public class SymbolicExecutionEngine{
     
@@ -187,13 +188,31 @@ public class SymbolicExecutionEngine{
             ts.addAll(st.transitions);
         }
         List<Transition> out_ts = new ArrayList<Transition>();
+        List<Declaration> symvars = new ArrayList<Declaration>();
+        for(Declaration d: this.statechart.declarations)
+        {
+            if(d.input == true)
+            {
+                symvars.add(d);
+            }
+        }
         for(Transition tr :ts)
         {
             for(State st: conf)
             {
                 if(tr.getSource().name.equals(st.name))
                 {
-                    System.out.println(tr.name);
+                    System.out.println(tr.guard);
+                    Solver solver = new Solver(tr.guard, symvars);
+                    try
+                    {
+                        String s = solver.solve();
+                        System.out.println(s);
+                    }
+                    catch(IOException i)
+                    {
+                        System.out.println("Error");
+                    }
                     out_ts.add(tr);
                     break;
                 }
