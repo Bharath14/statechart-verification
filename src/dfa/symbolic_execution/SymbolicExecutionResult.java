@@ -2,12 +2,12 @@ package symbolic_execution;
 
 import symbolic_execution.se_tree.SETNode;
 
-import java.util.List;
+import java.util.*;
 
 public class SymbolicExecutionResult{
     
-    private  List<SETNode> done;
-    private  List<SETNode> live;
+    private  List<SETNode> done = new ArrayList<SETNode>();
+    private  List<SETNode> live = new ArrayList<SETNode>();
 
     public SymbolicExecutionResult(){
         

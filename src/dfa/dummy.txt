@@ -1,0 +1,48 @@
+ /*public static SymbolicExecutionResult executeStatement(Statement s,Method f , List<SETNode> leaves)
+    {
+        List<SETNode> leaves_1 ;
+        List<SETNode> done;
+
+        for(SETNode l : leaves)
+        {
+            SymbolicExecutionResult res = f.invoke(s, l);
+            done.addAll(res.getDoneNodes());
+            leaves_1.addAll(res.getLiveNodes());
+        }
+
+        SymbolicExecutionResult res;
+
+        res.setDoneNodes(done);
+        res.setLiveNodes(leaves);
+        return res;
+    }*/
+
+    /*
+    // Functions need implementation
+    public static SymbolicExecutionResult takeTransition();
+    public static SymbolicExecutionResult enterState();
+    public static SymbolicExecutionResult exitState();
+    public static SymbolicExecutionResult executeStatement();
+    */
+// TODO
+    /*public execute(Statechart statechart){
+        return null;
+    }*/
+
+     /*public SymbolicExecutionEngine(Statechart statechart){
+            this.statechart = statechart;
+            //this.max_depth = depth;
+    } */
+
+    /*if(v.typeName.name.equals("int"))
+            {
+			    s = s + "(declare-fun " + v.vname + " () "+ "Int" + ")" + "\n";
+            }
+            else if(v.typeName.name.equals("string"))
+            {
+			    s = s + "(declare-fun " + v.vname + " () "+ "String" + ")" + "\n";
+            }
+            else if(v.typeName.name.equals("boolean"))
+            {
+			    s = s + "(declare-fun " + v.vname + " () "+ "Bool" + ")" + "\n";
+            }*/

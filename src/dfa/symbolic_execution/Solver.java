@@ -13,6 +13,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import symbolic_execution.se_tree.SymbolicExpression;
 
 public class Solver
 {
@@ -30,18 +31,7 @@ public class Solver
         String formula = formula(expression);
         for (Declaration v : symvars) 
         {
-            if(v.typeName.name.equals("int"))
-            {
-			    s = s + "(declare-fun " + v.vname + " () "+ "Int" + ")" + "\n";
-            }
-            else if(v.typeName.name.equals("string"))
-            {
-			    s = s + "(declare-fun " + v.vname + " () "+ "String" + ")" + "\n";
-            }
-            else if(v.typeName.name.equals("boolean"))
-            {
-			    s = s + "(declare-fun " + v.vname + " () "+ "Bool" + ")" + "\n";
-            }
+            s = s + "(declare-fun " + v.vname + " () "+ v.getType().toString() + ")" + "\n";
 		}
 
         s = s + "(assert " + formula + ")\n";
@@ -56,9 +46,9 @@ public class Solver
         String s = "";
         if(e instanceof BinaryExpression)
         {
-            Expression left = ((BinaryExpression)expression).left;
-            Expression right = ((BinaryExpression)expression).right;
-            String operator = ((BinaryExpression)expression).operator;
+            Expression left = ((BinaryExpression)e).left;
+            Expression right = ((BinaryExpression)e).right;
+            String operator = ((BinaryExpression)e).operator;
             if(operator.equals("||"))
             {
                 s = s + "( or " + formula(left) + " " + formula(right) + ")";
@@ -77,6 +67,36 @@ public class Solver
             }
             return s;
         }
+        else if(e instanceof SymbolicExpression)
+        {
+            Expression left = ((SymbolicExpression)e).left;
+            Expression right = ((SymbolicExpression)e).right;
+            String operator = ((SymbolicExpression)e).operator;
+            if(right != null)
+            {
+                if(operator.equals("||"))
+                {
+                    s = s + "( or " + formula(left) + " " + formula(right) + ")";
+                }
+                else if(operator.equals("&&"))
+                {
+                    s = s + "( and " + formula(left) + " " + formula(right) + ")";
+                }
+                else if(operator.equals("!="))
+                {
+                    s = s +"(not" + "( = " + formula(left) + " " + formula(right) + ")" + ")";
+                }
+                else
+                {
+                    s = s + "(" + operator + formula(left) + " " + formula(right) + ")";
+                }
+            }
+            else 
+            {
+                 s = s + formula(left);
+            }
+            return s;
+        }
         else if(e instanceof BooleanConstant || e instanceof IntegerConstant || e instanceof StringLiteral)
         {
             s = s + e.toString();
@@ -92,7 +112,7 @@ public class Solver
     public String solve() throws IOException
     {
         String input = this.conversion(this.expression, this.symvars);
-        //System.out.println("z3 input :\n" + input);
+        System.out.println("z3 input :\n" + input);
 
         FileWriter outFile;
 

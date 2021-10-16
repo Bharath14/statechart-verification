@@ -9,9 +9,9 @@ public class DecisionNode extends SETNode{
     //public final ast.Expression;
     public SymbolicExpression value;
     
-    public DecisionNode(SymbolicExpression value, SETNode leaf){
+    public DecisionNode(Expression value, SETNode leaf){
         super(leaf);
-        this.value = value;
+        this.value = (SymbolicExpression)value;
     }
 
     // Has a variable called value which is of the type SymbolicExpression

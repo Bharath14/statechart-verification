@@ -13,11 +13,11 @@ public class InstructionNode extends SETNode{
     public String name;
     public static final Map<String, SymbolicExpression> updates = new HashMap<String, SymbolicExpression>();
 
-    public InstructionNode(String s, SymbolicExpression expression, SETNode leaf){
+    public InstructionNode(String s, Expression expression, SETNode leaf){
         super(leaf);
         this.name = s;
-        this.expression = expression;
-        InstructionNode.updates.put(this.name, this.expression);
+        this.expression = (SymbolicExpression)expression;
+        InstructionNode.updates.put(this.name, (SymbolicExpression)this.expression);
     }
 
    
