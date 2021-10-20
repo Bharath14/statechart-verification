@@ -9,4 +9,4 @@ if [ $# = 0 ]; then
   testcase=TestAll
 fi
 
-java -cp ${MYCLASSPATH} org.junit.runner.JUnitCore testcases.${testcase}
+java -Xss4m -cp ${MYCLASSPATH} org.junit.runner.JUnitCore testcases.${testcase}

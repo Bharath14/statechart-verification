@@ -112,7 +112,7 @@ public class Solver
     public String solve() throws IOException
     {
         String input = this.conversion(this.expression, this.symvars);
-        System.out.println("z3 input :\n" + input);
+        //System.out.println("z3 input :\n" + input);
 
         FileWriter outFile;
 
@@ -138,7 +138,7 @@ public class Solver
 				p.getInputStream()));
 		line = input.readLine();
 		while (line != null) {
-			output += (line + '\n');
+			output += (line);
 			line = input.readLine();
 		}
 		input.close();
