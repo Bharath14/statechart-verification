@@ -61,9 +61,9 @@ public class SymTest{
 
     try {
       new Typechecker(statechart).typecheck();
-      System.out.println(input + ": Printing typechecked Statechart ...");
-      System.out.println(statechart.toString());
-      System.out.println(input + ": Printing typechecked Statechart ... done!");
+      //System.out.println(input + ": Printing typechecked Statechart ...");
+      //System.out.println(statechart.toString());
+      //System.out.println(input + ": Printing typechecked Statechart ... done!");
     }
     catch(Exception e) {
       System.out.println("Couldn't typecheck '" + input + "' : " + e.getMessage()); 

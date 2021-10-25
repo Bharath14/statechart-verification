@@ -15,11 +15,12 @@ import java.util.*;
 import java.util.List;
 import java.lang.reflect.Method;*/
 import java.io.IOException;
+//import javafx.util.Pair;
 
 public class SymbolicExecutionEngine{
     
     private Statechart statechart;
-    private static final Integer max_depth = 1;
+    private static final Integer max_depth = 100;
 
     public SymbolicExecutionEngine(Statechart statechart){
             this.statechart = statechart;
@@ -30,7 +31,7 @@ public class SymbolicExecutionEngine{
         return this.max_depth;
     }
 
-    public void initialize_variables(State st, String scope, SETNode leaf)
+    public SETNode initialize_variables(State st, String scope, SETNode leaf)
     {
         for(Declaration d: st.declarations)
         {
@@ -40,22 +41,23 @@ public class SymbolicExecutionEngine{
                 {
                     IntegerConstant i = new IntegerConstant(0);
                     SymbolicExpression exp = new SymbolicExpression(i," ");
-                    InstructionNode n = new InstructionNode(d.vname, i, leaf );
+                    leaf = new InstructionNode(d.vname, i, leaf );
                 }
                 else if(d.typeName.name.equals("string"))
                 {
                     StringLiteral s = new StringLiteral(" ");
                     SymbolicExpression exp = new SymbolicExpression(s," ");
-                    InstructionNode n = new InstructionNode(d.vname, s, leaf );
+                    leaf = new InstructionNode(d.vname, s, leaf );
                 }
                 else if(d.typeName.name.equals("boolean"))
                 {
                     BooleanConstant b = new BooleanConstant(false);
                     SymbolicExpression exp = new SymbolicExpression(b," ");
-                    InstructionNode n = new InstructionNode(d.vname, b, leaf );
+                    leaf = new InstructionNode(d.vname, b, leaf );
                 }        
             }
         }
+        return leaf;
     }
 
     public List<State> get_all_states(State s)
@@ -74,19 +76,19 @@ public class SymbolicExecutionEngine{
             }
         return all_states;
     }
-   public  SymbolicExecutionResult enterSuperstate(State s, SETNode leaf)
+   public SymbolicExecutionResult enterSuperstate(State s, SETNode leaf)
     {
         //System.out.println("enterSuperstate");
         leaf = new StateEntryNode(s, leaf);
-        initialize_variables(s, "local", leaf);
+        leaf = initialize_variables(s, "local", leaf);
         //System.out.println(s.entry);
         return executeBlock(s.entry, leaf);
     }
     public  SymbolicExecutionResult enterSubstate(State s, SETNode leaf)
     {
         leaf = new StateEntryNode(s, leaf);
-        initialize_variables(s, "local", leaf);
-        initialize_variables(s, "parameter", leaf);
+        leaf = initialize_variables(s, "local", leaf);
+        leaf = initialize_variables(s, "parameter", leaf);
         return executeBlock(s.entry, leaf);
     }
     
@@ -97,14 +99,13 @@ public class SymbolicExecutionEngine{
         List<State> all_states = get_all_states(this.statechart);
         for(State st: all_states)
         {
-            initialize_variables(st, "static", startnode);
+            startnode = initialize_variables(st, "static", startnode);
         }
         //initialize_static(this.statechart);
         //System.out.println(this.statechart.declarations.get(0).vname);
         //System.out.println(this.statechart.declarations.get(0).input);
         List<SETNode> done = new ArrayList<SETNode>();
         List<SETNode> leaves = new ArrayList<SETNode>();
-        List<SETNode> leaves_1 = new ArrayList<SETNode>();
         SymbolicExecutionResult res = new SymbolicExecutionResult();
         leaves.add(startnode);
 
@@ -120,15 +121,16 @@ public class SymbolicExecutionEngine{
            
             conf.add(start);
         }
-        Collections.reverse(conf);
+        //Collections.reverse(conf);
         for(State s: conf)
         { 
+            List<SETNode> leaves_1 = new ArrayList<SETNode>();
             for(SETNode leaf: leaves)
             { 
-                //System.out.println(s.name);
-                //if(s.getSuperstate() != null)
+                //if(!s.states.isEmpty())
                 //{
-                    res = this.enterSuperstate(s, leaf);
+                    //System.out.println(s.name);
+                    res = this.enterSubstate(s, leaf);
                     done.addAll(res.getDoneNodes());
                 
                     if(res.getLiveNodes().isEmpty())
@@ -137,7 +139,7 @@ public class SymbolicExecutionEngine{
                     }
                     else
                     {
-                        leaves_1 = res.getLiveNodes();
+                        leaves_1.addAll(res.getLiveNodes());
                     }
                 //}
                 //else
@@ -182,8 +184,7 @@ public class SymbolicExecutionEngine{
             {
                 for(Transition t : out_ts)
                 {
-                    System.out.println(t.guard);
-                    Solver solver = new Solver(sym_eval(t.guard, symvars), symvars);
+                    Solver solver = new Solver(sym_eval(t.guard, leaf), symvars);
                     try
                     {
                         s = solver.solve();
@@ -298,7 +299,7 @@ public class SymbolicExecutionEngine{
                 {
                     for(SETNode l : leaves)
                     {
-                        System.out.println(s);
+                        //System.out.println(s);
                         res = executeInstruction(s, l);
                     }
                 }
@@ -328,7 +329,7 @@ public class SymbolicExecutionEngine{
                 {
                     for(SETNode l : leaves)
                     {
-                        System.out.println(block);
+                        //System.out.println(block);
                         res = executeInstruction(block, l);
                     }
                 }
@@ -364,7 +365,7 @@ public class SymbolicExecutionEngine{
         {
             System.out.println("Assignment Statement");
             SETNode l = new InstructionNode(((AssignmentStatement)i).lhs.getDeclaration().vname,((AssignmentStatement)i).rhs, leaf );
-            System.out.println(InstructionNode.updates.get(((AssignmentStatement)i).lhs.getDeclaration().vname));
+            //System.out.println(InstructionNode.updates.get(((AssignmentStatement)i).lhs.getDeclaration().vname));
             if(leaf.depth +1 > max_depth)
             {
                 done.add(l);
@@ -380,14 +381,14 @@ public class SymbolicExecutionEngine{
         res.setLiveNodes(leaves);
         return res;
     }
-    public Expression sym_eval(Expression e, DeclarationList sym_vars)
+    public Expression sym_eval(Expression e, SETNode leaf)
     {
         Expression expr;
 
         if(e instanceof BinaryExpression)
         {
-            Expression left = sym_eval(((BinaryExpression)e).left, sym_vars);
-            Expression right = sym_eval(((BinaryExpression)e).right, sym_vars);
+            Expression left = sym_eval(((BinaryExpression)e).left, leaf);
+            Expression right = sym_eval(((BinaryExpression)e).right, leaf);
             String operator = ((BinaryExpression)e).operator;
 
             expr = new BinaryExpression(left, right, operator);
@@ -397,8 +398,8 @@ public class SymbolicExecutionEngine{
         {
             if(((SymbolicExpression)e).right != null)
             {
-                Expression left = sym_eval(((SymbolicExpression)e).left, sym_vars);
-                Expression right = sym_eval(((SymbolicExpression)e).right, sym_vars);
+                Expression left = sym_eval(((SymbolicExpression)e).left, leaf);
+                Expression right = sym_eval(((SymbolicExpression)e).right, leaf);
                 String operator = ((SymbolicExpression)e).operator;
 
                 expr = new SymbolicExpression(left, right, operator);
@@ -406,7 +407,7 @@ public class SymbolicExecutionEngine{
             }
             else
             {
-                Expression left = sym_eval(((SymbolicExpression)e).left, sym_vars);
+                Expression left = sym_eval(((SymbolicExpression)e).left, leaf);
                 String operator = ((SymbolicExpression)e).operator;
 
                 expr = new SymbolicExpression(left,operator);
@@ -419,10 +420,12 @@ public class SymbolicExecutionEngine{
         }
         else if(e instanceof Name)
         {
-            String s = ((Name)e).getDeclaration().vname;
-            System.out.println(((SymbolicExpression)InstructionNode.updates.get(s)).right);
+            //String s = ((Name)e).getDeclaration().vname;
+            //System.out.println(((SymbolicExpression)InstructionNode.updates.get(s)).right);
             //Declaration d = sym_vars.lookup(s);
-            expr = sym_eval(InstructionNode.updates.get(s), sym_vars);
+            List<Object> p = backtrack(e, leaf);
+            expr = (Expression)p.get(0);
+            leaf = (SETNode)p.get(1);
             return expr;
         }
         else if(e instanceof SymVars)
@@ -431,6 +434,42 @@ public class SymbolicExecutionEngine{
             return e;
         }
         return null;
+    }
+    public List<Object> backtrack(Expression e , SETNode leaf)
+    {
+        if(leaf instanceof InstructionNode)
+        {
+            String s = ((Name)e).getDeclaration().vname;
+            SymbolicExpression exp = ((InstructionNode)leaf).updates.get(s);
+            if(exp == null)
+            {
+                if(leaf.parent != null)
+                {
+                    leaf = leaf.parent;
+                    return backtrack(e, leaf);
+                }
+                else
+                {
+                    return Arrays.asList(null, leaf.parent);
+                }
+            }
+            else
+            {
+                return Arrays.asList(exp, leaf.parent);
+            }
+        }
+        else
+        {
+            if(leaf.parent != null)
+            {
+                leaf = leaf.parent;
+                return backtrack(e, leaf);
+            }
+            else
+            {
+                return Arrays.asList(null, leaf.parent);
+            }
+        }
     }
     public SymbolicExecutionResult executeIf(Statement i, SETNode leaf)
     {
@@ -445,7 +484,7 @@ public class SymbolicExecutionEngine{
                 boolean is_added = symvars.add(d);
             }
         }
-        Expression symeval = sym_eval(((IfStatement)i).condition, symvars);
+        Expression symeval = sym_eval(((IfStatement)i).condition, leaf);
 
         Solver solver = new Solver(symeval, symvars);
         String satisfiable = new String();
