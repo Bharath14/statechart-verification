@@ -10,15 +10,15 @@ public class InstructionNode extends SETNode{
 
     //public final InstructionStatement s;
     public SymbolicExpression expression;
-    public String name;
-    public static final Map<String, SymbolicExpression> updates = new HashMap<String, SymbolicExpression>();
+    public Declaration variable;
+    public static final Map<Declaration, SymbolicExpression> updates = new HashMap<Declaration, SymbolicExpression>();
 
-    public InstructionNode(String s, Expression e, SETNode leaf){
+    public InstructionNode(Declaration d, Expression e, SETNode leaf){
         super(leaf);
-        this.name = s;
+        this.variable = d;
         this.expression = evaluate_exp(e);
        
-        InstructionNode.updates.put(this.name, this.expression);
+        InstructionNode.updates.put(this.variable, this.expression);
 
         if(leaf != null)
         {
@@ -45,7 +45,7 @@ public class InstructionNode extends SETNode{
         }
         else if(e instanceof FunctionCall)
         {
-            SymVars n = new SymVars(this.name+"_1");
+            SymVars n = new SymVars(this.variable.vname+"_1", this.variable.getType());
             SymbolicExpression exp = new SymbolicExpression(n, " ");
             return exp;
         }

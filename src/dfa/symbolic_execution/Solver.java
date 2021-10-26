@@ -7,6 +7,7 @@ import ast.BinaryExpression;
 import ast.BooleanConstant;
 import ast.IntegerConstant;
 import ast.StringLiteral;
+import ast.Type;
 import java.util.*;
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import symbolic_execution.se_tree.SymbolicExpression;
+import symbolic_execution.se_tree.SymVars;
 
 public class Solver
 {
@@ -25,13 +27,24 @@ public class Solver
         this.symvars = symvars;
     }
 
-    public String conversion(Expression expression, List<Declaration> symvars)
+    public String conversion(Expression expression)
     {
         String s = "";
         String formula = formula(expression);
-        for (Declaration v : symvars) 
+        for (Map.Entry<String, Type> v : SymVars.symvarslist.entrySet()) 
         {
-            s = s + "(declare-fun " + v.vname + " () "+ v.getType().toString() + ")" + "\n";
+            if(v.getValue().name.equals("int"))
+            {
+                s = s + "(declare-fun " + v.getKey() + "()" + "Int" + ")" + "\n";
+            }
+            else if(v.getValue().name.equals("string"))
+            {
+                s = s + "(declare-fun " + v.getKey() + "()" + "String" + ")" + "\n";
+            }
+            else if(v.getValue().name.equals("bool"))
+            {
+                s = s + "(declare-fun " + v.getKey() + "()" + "Bool" + ")" + "\n";
+            }
 		}
 
         s = s + "(assert " + formula + ")\n";
@@ -107,11 +120,22 @@ public class Solver
             s = s + ((Name)e).getDeclaration().vname;
             return s;
         }
+        else if(e instanceof SymVars)
+        {
+            s = s + ((SymVars)e).value;
+            return s;
+        }
+        else if( e == null)
+        {
+            //System.out.println("null");
+            //s = s + "0";
+            return s;
+        }
         return s;
     }
     public String solve() throws IOException
     {
-        String input = this.conversion(this.expression, this.symvars);
+        String input = this.conversion(this.expression);
         //System.out.println("z3 input :\n" + input);
 
         FileWriter outFile;

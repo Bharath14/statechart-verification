@@ -41,19 +41,19 @@ public class SymbolicExecutionEngine{
                 {
                     IntegerConstant i = new IntegerConstant(0);
                     SymbolicExpression exp = new SymbolicExpression(i," ");
-                    leaf = new InstructionNode(d.vname, i, leaf );
+                    leaf = new InstructionNode(d, i, leaf );
                 }
                 else if(d.typeName.name.equals("string"))
                 {
                     StringLiteral s = new StringLiteral(" ");
                     SymbolicExpression exp = new SymbolicExpression(s," ");
-                    leaf = new InstructionNode(d.vname, s, leaf );
+                    leaf = new InstructionNode(d, s, leaf );
                 }
                 else if(d.typeName.name.equals("boolean"))
                 {
                     BooleanConstant b = new BooleanConstant(false);
                     SymbolicExpression exp = new SymbolicExpression(b," ");
-                    leaf = new InstructionNode(d.vname, b, leaf );
+                    leaf = new InstructionNode(d, b, leaf );
                 }        
             }
         }
@@ -371,7 +371,7 @@ public class SymbolicExecutionEngine{
         if(i instanceof AssignmentStatement)
         {
             System.out.println("Assignment Statement");
-            SETNode l = new InstructionNode(((AssignmentStatement)i).lhs.getDeclaration().vname,((AssignmentStatement)i).rhs, leaf );
+            SETNode l = new InstructionNode(((AssignmentStatement)i).lhs.getDeclaration(),((AssignmentStatement)i).rhs, leaf );
             //System.out.println(InstructionNode.updates.get(((AssignmentStatement)i).lhs.getDeclaration().vname));
             if(leaf.depth +1 > max_depth)
             {
@@ -447,7 +447,7 @@ public class SymbolicExecutionEngine{
         if(leaf instanceof InstructionNode)
         {
             String s = ((Name)e).getDeclaration().vname;
-            SymbolicExpression exp = ((InstructionNode)leaf).updates.get(s);
+            SymbolicExpression exp = ((InstructionNode)leaf).updates.get(((Name)e).getDeclaration());
             if(exp == null)
             {
                 if(leaf.parent != null)

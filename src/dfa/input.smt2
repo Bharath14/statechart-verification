@@ -1,3 +1,8 @@
+(declare-fun subjCode_1()Int)
+(declare-fun semester_1()Int)
+(declare-fun scredit_1()Int)
+(declare-fun student_1()Int)
+(declare-fun degree_1()Int)
 (assert true)
 (check-sat)
 (exit)
