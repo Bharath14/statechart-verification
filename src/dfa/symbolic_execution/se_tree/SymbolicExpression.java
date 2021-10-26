@@ -11,7 +11,7 @@ public class SymbolicExpression extends Expression
 
   public final String operator;
 
-  public enum OperatorType {
+  /*public enum OperatorType {
     PLUS, // "+"
     MUL,  // "*"
     SUB,  // "-"
@@ -43,7 +43,7 @@ public class SymbolicExpression extends Expression
     SymbolicExpression.operator_string.put(OperatorType.EQ,   "=");
     SymbolicExpression.operator_string.put(OperatorType.AND,  "&&");
     SymbolicExpression.operator_string.put(OperatorType.OR,   "||");
-  }
+  }*/
 
   public SymbolicExpression(Expression left, Expression right, String operator) {
     this.left     = left;
@@ -55,5 +55,20 @@ public class SymbolicExpression extends Expression
     this.left = expression;
     this.operator   = operator;
     this.right = null;
+  }
+
+  public String toString()
+  {
+    if(this.right != null && this.left != null)
+    {
+      String s = this.left.toString() + " " + this.operator + " " + this.right.toString();
+      return s;
+    }
+    else if(this.left!= null)
+    {
+      String s = this.left.toString() + " " + this.operator;
+      return s;
+    }
+    return "null";
   }
 }

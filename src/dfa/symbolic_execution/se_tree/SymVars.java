@@ -11,4 +11,10 @@ public class SymVars extends Expression
     {
         this.value = value;
     }
+
+    public String toString()
+    {
+        String s = this.value ;
+        return s;
+    }
 }
