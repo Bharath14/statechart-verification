@@ -20,11 +20,11 @@ import symbolic_execution.se_tree.SymVars;
 public class Solver
 {
     Expression expression;
-    public List<Declaration> symvars;
-    public Solver(Expression expression, List<Declaration> symvars)
+    public List<Declaration> symvars = new ArrayList<Declaration>();
+    public Solver(Expression expression)
     {
         this.expression = expression;
-        this.symvars = symvars;
+        //this.symvars = symvars;
     }
 
     public String conversion(Expression expression)
@@ -123,12 +123,6 @@ public class Solver
         else if(e instanceof SymVars)
         {
             s = s + ((SymVars)e).value;
-            return s;
-        }
-        else if( e == null)
-        {
-            //System.out.println("null");
-            //s = s + "0";
             return s;
         }
         return s;

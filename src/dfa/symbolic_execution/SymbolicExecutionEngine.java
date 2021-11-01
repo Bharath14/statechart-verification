@@ -20,7 +20,8 @@ import java.io.IOException;
 public class SymbolicExecutionEngine{
     
     private Statechart statechart;
-    private static final Integer max_depth = 10;
+    private static final Integer max_depth = 100;
+    private List<State> conf = new ArrayList<State>(); 
 
     public SymbolicExecutionEngine(Statechart statechart){
             this.statechart = statechart;
@@ -76,6 +77,26 @@ public class SymbolicExecutionEngine{
             }
         return all_states;
     }
+    public List<Transition> compute_outts(List<State> conf)
+    {
+        List<Transition> ts = new ArrayList<Transition>();
+        for(State st: conf)
+        {
+            ts.addAll(st.transitions);
+        }
+        List<Transition> out_ts = new ArrayList<Transition>();
+        for(Transition tr :ts)
+        {
+            for(State st: conf)
+            {
+                if(tr.getSource().name.equals(st.name))
+                {
+                    out_ts.add(tr);
+                }
+            }
+        }
+        return out_ts;
+    }
    public SymbolicExecutionResult enterSuperstate(State s, SETNode leaf)
     {
         //System.out.println("enterSuperstate");
@@ -101,80 +122,43 @@ public class SymbolicExecutionEngine{
         {
             startnode = initialize_variables(st, "static", startnode);
         }
-        //initialize_static(this.statechart);
-        //System.out.println(this.statechart.declarations.get(0).vname);
-        //System.out.println(this.statechart.declarations.get(0).input);
         List<SETNode> done = new ArrayList<SETNode>();
         List<SETNode> leaves = new ArrayList<SETNode>();
         SymbolicExecutionResult res = new SymbolicExecutionResult();
         leaves.add(startnode);
 
         //conf = compute initial configuration
-        List<State> conf = new ArrayList<State>();
-        conf.add(this.statechart);
+        //List<State> conf = new ArrayList<State>();
+        this.conf.add(this.statechart);
         State start = this.statechart.states.get(0);
-        //System.out.println(start);
-        conf.add(start);
+        this.conf.add(start);
         while(!start.states.isEmpty())
         {
             start = start.states.get(0);
            
-            conf.add(start);
+            this.conf.add(start);
         }
-        //Collections.reverse(conf);
-        for(State s: conf)
+        for(State s: this.conf)
         { 
             List<SETNode> leaves_1 = new ArrayList<SETNode>();
             for(SETNode leaf: leaves)
             { 
-                //if(!s.states.isEmpty())
-                //{
-                    //System.out.println(s.name);
-                    res = this.enterSubstate(s, leaf);
-                    done.addAll(res.getDoneNodes());
-                
-                    if(res.getLiveNodes().isEmpty())
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        leaves_1.addAll(res.getLiveNodes());
-                    }
-                //}
-                //else
-                //{
-                  //  break;
-                //}
-            }
-            //System.out.println(leaves_1);
-            leaves = leaves_1;
-        }
-        List<Transition> ts = new ArrayList<Transition>();
-        for(State st: conf)
-        {
-            ts.addAll(st.transitions);
-        }
-        List<Transition> out_ts = new ArrayList<Transition>();
-        DeclarationList symvars = new DeclarationList();
-        for(Declaration d: this.statechart.declarations)
-        {
-            if(d.input == true)
-            {
-                System.out.println(d.vname);
-                boolean is_added = symvars.add(d);
-            }
-        }
-        for(Transition tr :ts)
-        {
-            for(State st: conf)
-            {
-                if(tr.getSource().name.equals(st.name))
+                res = this.enterSubstate(s, leaf);
+                done.addAll(res.getDoneNodes());
+            
+                if(res.getLiveNodes().isEmpty())
                 {
-                    out_ts.add(tr);
+                    break;
+                }
+                else
+                {
+                    leaves_1.addAll(res.getLiveNodes());
                 }
             }
+            leaves = leaves_1;
         }
+        List<Transition> out_ts = new ArrayList<Transition>();
+        out_ts = compute_outts(this.conf);
         String s = " ";
         while(!leaves.isEmpty())
         {
@@ -184,8 +168,8 @@ public class SymbolicExecutionEngine{
             {
                 for(Transition t : out_ts)
                 {
-                    System.out.println(sym_eval(t.guard, leaf));
-                    Solver solver = new Solver(sym_eval(t.guard, leaf), symvars);
+                    //System.out.println(sym_eval(t.guard, leaf));
+                    Solver solver = new Solver(sym_eval(t.guard, leaf));
                     try
                     {
                         s = solver.solve();
@@ -203,7 +187,9 @@ public class SymbolicExecutionEngine{
                         leaves_2.addAll(res.getLiveNodes());
                     }
                 }
+                out_ts = compute_outts(this.conf);
             }
+
             leaves = leaves_2;
         }
 
@@ -242,6 +228,7 @@ public class SymbolicExecutionEngine{
         List<SETNode> leaves_1 = new ArrayList<SETNode>();
         for(State s: source_states)
         {
+            this.conf.remove(s);
             for(SETNode l: leaves)
             {
                 SymbolicExecutionResult res = exitState(s, l);
@@ -249,17 +236,19 @@ public class SymbolicExecutionEngine{
                 leaves_1.addAll(res.getLiveNodes());
             }
         }
-        leaves = leaves_1;
+        leaves.clear();
 
+        leaves.addAll(leaves_1);
         leaves_1.clear();
         for(SETNode l : leaves)
         {
-            System.out.println(t.action);
             SymbolicExecutionResult res = executeBlock(t.action, l);
             done.addAll(res.getDoneNodes());
             leaves_1.addAll(res.getLiveNodes());
         }
-        leaves = leaves_1;
+        leaves.clear();
+
+        leaves.addAll(leaves_1);
 
         State destination = t.getDestination();
         List<State> destination_Superstates = new ArrayList<State>();
@@ -272,6 +261,7 @@ public class SymbolicExecutionEngine{
         leaves_1.clear();
         for(State d: destination_Superstates)
         {
+            this.conf.add(d);
             for(SETNode l: leaves)
             {
                 SymbolicExecutionResult res = enterSuperstate(d, l);
@@ -279,7 +269,9 @@ public class SymbolicExecutionEngine{
                 leaves_1.addAll(res.getLiveNodes());
             }
         }
-        leaves = leaves_1;
+        leaves.clear();
+
+        leaves.addAll(leaves_1);
 
         destination = t.getDestination();
         List<State> destination_Substates = new ArrayList<State>();
@@ -291,6 +283,7 @@ public class SymbolicExecutionEngine{
         leaves_1.clear();
         for(State d: destination_Substates)
         {
+            this.conf.add(d);
             for(SETNode l: leaves)
             {
                 SymbolicExecutionResult res = enterSubstate(d, l);
@@ -298,7 +291,9 @@ public class SymbolicExecutionEngine{
                 leaves_1.addAll(res.getLiveNodes());
             }
         }
-        leaves = leaves_1;
+        leaves.clear();
+
+        leaves.addAll(leaves_1);
         SymbolicExecutionResult res = new SymbolicExecutionResult();
 
         res.setDoneNodes(done);
@@ -350,17 +345,17 @@ public class SymbolicExecutionEngine{
             {
                 res = executeStatement(s, leaves);
                 done.addAll(res.getDoneNodes());
-                leaves_1.addAll(res.getLiveNodes());
+                leaves = res.getLiveNodes();
             }
         }
         else
         {
                 res = executeStatement(block, leaves);
                 done.addAll(res.getDoneNodes());
-                leaves_1.addAll(res.getLiveNodes());
+                leaves = res.getLiveNodes();
         }
         res.setDoneNodes(done);
-        res.setLiveNodes(leaves_1);
+        res.setLiveNodes(leaves);
         return res;
     }
     public  SymbolicExecutionResult executeInstruction(Statement i, SETNode leaf)
@@ -427,9 +422,6 @@ public class SymbolicExecutionEngine{
         }
         else if(e instanceof Name)
         {
-            //String s = ((Name)e).getDeclaration().vname;
-            //System.out.println(((SymbolicExpression)InstructionNode.updates.get(s)).right);
-            //Declaration d = sym_vars.lookup(s);
             List<Object> p = backtrack(e, leaf);
             expr = (Expression)p.get(0);
             leaf = (SETNode)p.get(1);
@@ -482,18 +474,9 @@ public class SymbolicExecutionEngine{
     {
         List<SETNode> done = new ArrayList<SETNode>();
         List<SETNode> leaves = new ArrayList<SETNode>();
-        DeclarationList symvars = new DeclarationList();
-        for(Declaration d: this.statechart.declarations)
-        {
-            if(d.input == true)
-            {
-                System.out.println(d.vname);
-                boolean is_added = symvars.add(d);
-            }
-        }
         Expression symeval = sym_eval(((IfStatement)i).condition, leaf);
 
-        Solver solver = new Solver(symeval, symvars);
+        Solver solver = new Solver(symeval);
         String satisfiable = new String();
         try
         {
