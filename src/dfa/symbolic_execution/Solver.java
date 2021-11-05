@@ -101,12 +101,12 @@ public class Solver
                 }
                 else
                 {
-                    s = s + "(" + operator + formula(left) + " " + formula(right) + ")";
+                    s = s + "("+ operator +" "+formula(left) + " " + formula(right) + ")";
                 }
             }
             else 
             {
-                 s = s + formula(left);
+                 s = s +formula(left);
             }
             return s;
         }
@@ -130,7 +130,7 @@ public class Solver
     public String solve() throws IOException
     {
         String input = this.conversion(this.expression);
-        //System.out.println("z3 input :\n" + input);
+        System.out.println("z3 input :\n" + input);
 
         FileWriter outFile;
 
@@ -140,7 +140,7 @@ public class Solver
 		out.close();
 		String command = "z3 input.smt2";
 		String output = this.cmdExec(command);
-		//System.out.println("z3 output :\n" + output);
+		System.out.println("z3 output :\n" + output);
 
         return output;
 

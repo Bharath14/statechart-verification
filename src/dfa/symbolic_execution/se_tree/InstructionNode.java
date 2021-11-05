@@ -11,14 +11,14 @@ public class InstructionNode extends SETNode{
     //public final InstructionStatement s;
     public SymbolicExpression expression;
     public Declaration variable;
-    public static final Map<Declaration, SymbolicExpression> updates = new HashMap<Declaration, SymbolicExpression>();
+    public Map<Declaration, SymbolicExpression> updates = new HashMap<Declaration, SymbolicExpression>();
 
     public InstructionNode(Declaration d, Expression e, SETNode leaf){
         super(leaf);
         this.variable = d;
         this.expression = evaluate_exp(e);
        
-        InstructionNode.updates.put(this.variable, this.expression);
+        this.updates.put(this.variable, this.expression);
 
         if(leaf != null)
         {

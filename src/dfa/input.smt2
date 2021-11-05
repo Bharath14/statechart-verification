@@ -3,6 +3,6 @@
 (declare-fun scredit_1()Int)
 (declare-fun student_1()Int)
 (declare-fun degree_1()Int)
-(assert true)
+(assert (not( = 0 0)))
 (check-sat)
 (exit)
