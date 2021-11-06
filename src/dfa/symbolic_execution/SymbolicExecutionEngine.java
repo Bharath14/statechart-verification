@@ -104,6 +104,8 @@ public class SymbolicExecutionEngine{
         leaf = new StateEntryNode(s, leaf);
         leaf = initialize_variables(s, "local", leaf);
         //System.out.println(s.entry);
+        System.out.println("Enter State :");
+        System.out.println(s.name);
         return executeBlock(s.entry, leaf);
     }
     public  SymbolicExecutionResult enterSubstate(State s, SETNode leaf)
@@ -111,6 +113,8 @@ public class SymbolicExecutionEngine{
         leaf = new StateEntryNode(s, leaf);
         leaf = initialize_variables(s, "local", leaf);
         leaf = initialize_variables(s, "parameter", leaf);
+        System.out.println("Enter State :");
+        System.out.println(s.name);
         return executeBlock(s.entry, leaf);
     }
     
@@ -209,6 +213,8 @@ public class SymbolicExecutionEngine{
     public  SymbolicExecutionResult exitState(State s, SETNode leaf)
     {
         leaf = new StateExitNode(s, leaf);
+        System.out.println("Exit State :");
+        System.out.println(s.name);
         return executeBlock(s.exit, leaf);
     }
     public  SymbolicExecutionResult takeTransition(Transition t, SETNode leaf)

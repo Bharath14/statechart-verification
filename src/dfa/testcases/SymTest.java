@@ -40,7 +40,7 @@ public class SymTest{
     System.out.println("Symbolic Execution");
     Statechart statechart = null;
     Typechecker typechecker;
-    String input = "data/course.stb";
+    String input = "data/testcase1.stb";
 
     try {
       Parser parser = new FrontEnd(input).getParser();    
@@ -103,7 +103,7 @@ public class SymTest{
     System.out.println(done.get(0).depth);
     System.out.println(done.get(1).depth);
     */
-    SymbolicExecutionEngine symbolictest = new SymbolicExecutionEngine(statechart, 5);
+    SymbolicExecutionEngine symbolictest = new SymbolicExecutionEngine(statechart, 1);
     SymbolicExecutionResult res = new SymbolicExecutionResult();
     //symbolictest.execute();
     res.setDoneNodes(symbolictest.execute());
