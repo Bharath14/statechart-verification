@@ -103,7 +103,7 @@ public class SymTest{
     System.out.println(done.get(0).depth);
     System.out.println(done.get(1).depth);
     */
-    SymbolicExecutionEngine symbolictest = new SymbolicExecutionEngine(statechart, 1);
+    SymbolicExecutionEngine symbolictest = new SymbolicExecutionEngine(statechart, 7);
     SymbolicExecutionResult res = new SymbolicExecutionResult();
     //symbolictest.execute();
     res.setDoneNodes(symbolictest.execute());

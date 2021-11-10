@@ -171,9 +171,9 @@ public class SymbolicExecutionEngine{
         {
             //out_ts = outgoing transitions from conf
             List<SETNode> leaves_2 = new ArrayList<SETNode>() ;
-            for(Transition t : out_ts)
+            for(SETNode leaf: leaves)
             {
-                for(SETNode leaf: leaves)
+                for(Transition t : out_ts)
                 {
                     System.out.println(t.name);
                     System.out.println(t.guard);
@@ -398,6 +398,10 @@ public class SymbolicExecutionEngine{
                 leaves.add(l);
             }
         }
+        if(i instanceof HaltStatement)
+        {
+            done.add(leaf);
+        }
 
         SymbolicExecutionResult res = new SymbolicExecutionResult();
 
@@ -497,6 +501,8 @@ public class SymbolicExecutionEngine{
         List<SETNode> done = new ArrayList<SETNode>();
         List<SETNode> leaves = new ArrayList<SETNode>();
         Expression symeval = sym_eval(((IfStatement)i).condition, leaf);
+        SymbolicExpression else_condition = new SymbolicExpression(((IfStatement)i).condition, "!");
+        Expression symeval_else = sym_eval(else_condition, leaf);
 
         Solver solver = new Solver(symeval);
         String satisfiable = new String();
@@ -521,8 +527,20 @@ public class SymbolicExecutionEngine{
         {
             done.add(leaf);
         }
+        
 
-        if(satisfiable.equals("unsat"))
+        Solver solver_else = new Solver(symeval_else);
+        String else_satisfiable = new String();
+        try
+        {
+            else_satisfiable = solver_else.solve();
+            //System.out.println(s);
+        }
+        catch(IOException exception)
+        {
+            System.out.println("Error");
+        }
+        if(else_satisfiable.equals("sat"))
         {
             SETNode leaf_1 = new DecisionNode(((IfStatement)i).condition, leaf);
             SymbolicExecutionResult res_2 = executeBlock(((IfStatement)i).else_body, leaf_1);
@@ -539,8 +557,8 @@ public class SymbolicExecutionEngine{
             SymbolicExecutionResult res = new SymbolicExecutionResult();
             done.add(leaf);
             res.setDoneNodes(done);
-            System.out.println("if");
-            System.out.println(res.getDoneNodes());
+            //System.out.println("if");
+            //System.out.println(res.getDoneNodes());
             return res;
         }
         else
@@ -548,8 +566,8 @@ public class SymbolicExecutionEngine{
             SymbolicExecutionResult res = new SymbolicExecutionResult();
             res.setDoneNodes(done);
             res.setLiveNodes(leaves);
-            System.out.println("else");
-            System.out.println(res.getDoneNodes());
+            //System.out.println("else");
+            //System.out.println(res.getDoneNodes());
 
             return res;
         }

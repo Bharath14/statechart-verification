@@ -27,8 +27,9 @@ statechart sc
 
   state s2 
   {
-    entry : {
-      switch_status := 1;
+    entry : 
+    {
+      switch_status := input<||>();
     } 
 
     exit  : {} 
@@ -41,7 +42,16 @@ statechart sc
     destination : sc.s2;
     trigger     : switch;
     guard       : true;
-    action      : switch_status := switch_status + 1;
+    action      : {
+        if(switch_status != 1)
+        {
+            switch_status := switch_status + 1;
+        }
+        else
+        {
+            switch_status := switch_status -1;
+        }
+    }
   }
    transition t2 
   {

@@ -51,7 +51,7 @@ public class InstructionNode extends SETNode{
         }
         else if(e instanceof SymbolicExpression)
         {
-            return ((SymbolicExpression)expression);
+            return ((SymbolicExpression)e);
         }
         else
         {

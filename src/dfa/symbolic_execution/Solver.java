@@ -106,7 +106,15 @@ public class Solver
             }
             else 
             {
-                 s = s +formula(left);
+                if(operator.equals("!"))
+                {
+                    s = s +"(not" +" "+ formula(left) + " " + ")";
+                }
+
+                else
+                {
+                    s = s +formula(left);
+                }
             }
             return s;
         }
