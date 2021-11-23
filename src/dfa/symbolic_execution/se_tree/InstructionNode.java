@@ -9,9 +9,9 @@ import java.util.HashMap;
 public class InstructionNode extends SETNode{
 
     //public final InstructionStatement s;
-    public SymbolicExpression expression;
-    public Declaration variable;
-    public Map<Declaration, SymbolicExpression> updates = new HashMap<Declaration, SymbolicExpression>();
+    public final SymbolicExpression expression;
+    public final Declaration variable;
+    public final Map<Declaration, SymbolicExpression> updates = new HashMap<Declaration, SymbolicExpression>();
 
     public InstructionNode(Declaration d, Expression e, SETNode leaf){
         super(leaf);
@@ -28,7 +28,7 @@ public class InstructionNode extends SETNode{
 
     public SymbolicExpression evaluate_exp(Expression e)
     {
-         if(e instanceof BinaryExpression)
+        if(e instanceof BinaryExpression)
         {
             SymbolicExpression exp = new SymbolicExpression(((BinaryExpression)e).left, ((BinaryExpression)e).right, ((BinaryExpression)e).operator);
             return exp;

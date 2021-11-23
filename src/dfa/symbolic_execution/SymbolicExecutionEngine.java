@@ -20,19 +20,26 @@ import java.io.IOException;
 public class SymbolicExecutionEngine{
     
     private final Statechart statechart;
-    private final Integer max_depth ;
-    private List<State> conf = new ArrayList<State>(); 
+    private static Integer max_depth ;
+    private static Integer max_tree_depth;
+    private static List<State> conf = new ArrayList<State>(); 
 
-    public SymbolicExecutionEngine(Statechart statechart, Integer max_depth){
+    public SymbolicExecutionEngine(Statechart statechart, Integer md){
             this.statechart = statechart;
-            this.max_depth = max_depth;
+            max_depth = md;
     }
-    public Integer get_depth()
+    public static Integer get_depth()
     {
-        return this.max_depth;
+        return max_depth;
     }
 
-    public SETNode initialize_variables(State st, String scope, SETNode leaf)
+    public static void set_maxDepth(Integer md, Integer mtd)
+    {
+        max_depth = md;
+        max_tree_depth = mtd;
+    }
+
+    public static SETNode initialize_variables(State st, String scope, SETNode leaf)
     {
         for(Declaration d: st.declarations)
         {
@@ -58,7 +65,7 @@ public class SymbolicExecutionEngine{
         return leaf;
     }
 
-    public List<State> get_all_states(State s)
+    public static List<State> get_all_states(State s)
     {
         List<State> all_states = new ArrayList<State>();
         all_states.add(s);
@@ -74,9 +81,9 @@ public class SymbolicExecutionEngine{
         return all_states;
     }
 
-    public List<Transition> compute_outts(List<State> conf, List<Transition> all_ts)
+    public static Set<Transition> compute_outts(List<State> conf, List<Transition> all_ts)
     {
-        List<Transition> out_ts = new ArrayList<Transition>();
+        Set<Transition> out_ts = new LinkedHashSet<Transition>();
         for(Transition tr :all_ts)
         {
             for(State st: conf)
@@ -90,7 +97,7 @@ public class SymbolicExecutionEngine{
         return out_ts;
     }
 
-    public SymbolicExecutionResult enterSuperstate(State s, SETNode leaf)
+    public static SymbolicExecutionResult enterSuperstate(State s, SETNode leaf)
     {
         //System.out.println("enterSuperstate");
         leaf = new StateEntryNode(s, leaf);
@@ -101,7 +108,7 @@ public class SymbolicExecutionEngine{
         return executeBlock(s.entry, leaf);
     }
 
-    public  SymbolicExecutionResult enterSubstate(State s, SETNode leaf)
+    public static SymbolicExecutionResult enterSubstate(State s, SETNode leaf)
     {
         leaf = new StateEntryNode(s, leaf);
         leaf = initialize_variables(s, "local", leaf);
@@ -111,11 +118,11 @@ public class SymbolicExecutionEngine{
         return executeBlock(s.entry, leaf);
     }
     
-    public List<SETNode> execute()
+    public static List<SETNode> execute(Statechart statechart)
     {
         //initialise all static variables to v.type.init
         SETNode startnode = new SETNode(null);
-        List<State> all_states = get_all_states(this.statechart);
+        List<State> all_states = get_all_states(statechart);
         List<Transition> all_ts = new ArrayList<Transition>();
         for(State st: all_states)
         {
@@ -127,20 +134,20 @@ public class SymbolicExecutionEngine{
         SymbolicExecutionResult res = new SymbolicExecutionResult();
         leaves.add(startnode);
 
-        this.conf.add(this.statechart);
-        State start = this.statechart.states.get(0);
-        this.conf.add(start);
+        conf.add(statechart);
+        State start = statechart.states.get(0);
+        conf.add(start);
         while(!start.states.isEmpty())
         {
             start = start.states.get(0);
-            this.conf.add(start);
+            conf.add(start);
         }
-        for(State s: this.conf)
+        for(State s: conf)
         { 
             List<SETNode> leaves_temp1 = new ArrayList<SETNode>();
             for(SETNode leaf: leaves)
             { 
-                res = this.enterSubstate(s, leaf);
+                res = enterSubstate(s, leaf);
                 done.addAll(res.getDoneNodes());
             
                 if(res.getLiveNodes().isEmpty())
@@ -155,8 +162,8 @@ public class SymbolicExecutionEngine{
             leaves = leaves_temp1;
         }
 
-        List<Transition> out_ts = new ArrayList<Transition>();
-        out_ts = compute_outts(this.conf, all_ts);
+        Set<Transition> out_ts = new LinkedHashSet<Transition>();
+        out_ts = compute_outts(conf, all_ts);
         String s = " ";
         while(!leaves.isEmpty())
         {
@@ -189,8 +196,22 @@ public class SymbolicExecutionEngine{
                     }
                 }
             }
-            out_ts = compute_outts(this.conf, all_ts);
-            leaves = leaves_temp2;
+            //leaves = leaves_temp2;
+            out_ts = compute_outts(conf, all_ts);
+            
+            for(SETNode leaf: leaves_temp2)
+            {
+                System.out.println("treedepth:");
+                System.out.println(leaf.treedepth);
+                if(leaf.treedepth>max_tree_depth)
+                {
+                    done.add(leaf);
+                }
+                else
+                {
+                    leaves.add(leaf);
+                }
+            }
         }
 
         res.setDoneNodes(done);
@@ -198,14 +219,14 @@ public class SymbolicExecutionEngine{
         return res.getDoneNodes();
     }
 
-    public  SymbolicExecutionResult exitState(State s, SETNode leaf)
+    public static SymbolicExecutionResult exitState(State s, SETNode leaf)
     {
         leaf = new StateExitNode(s, leaf);
         System.out.println("Exit State :");
         System.out.println(s.name);
         return executeBlock(s.exit, leaf);
     }
-    public  SymbolicExecutionResult takeTransition(Transition t, SETNode leaf)
+    public static SymbolicExecutionResult takeTransition(Transition t, SETNode leaf)
     {
         List<SETNode> leaves = new ArrayList<SETNode>();
         leaves.add(leaf);
@@ -236,14 +257,15 @@ public class SymbolicExecutionEngine{
                 done.addAll(res.getDoneNodes());
                 leaves_1.addAll(res.getLiveNodes());
             }
-            this.conf.remove(s);
-        }
-        leaves.clear();
+            conf.remove(s);
+            leaves.clear();
 
-        leaves.addAll(leaves_1);
-        leaves_1.clear();
+            leaves.addAll(leaves_1);
+            leaves_1.clear();
+        }
         for(SETNode l : leaves)
         {
+            System.out.println("t.guard:");
             SymbolicExecutionResult res = executeBlock(t.action, l);
             done.addAll(res.getDoneNodes());
             leaves_1.addAll(res.getLiveNodes());
@@ -260,20 +282,20 @@ public class SymbolicExecutionEngine{
             destination = destination.getSuperstate();
             destination_Superstates.add(destination);
         }
-        leaves_1.clear();
+        
         for(State d: destination_Superstates)
         {
+            leaves_1.clear();
             for(SETNode l: leaves)
             {
                 SymbolicExecutionResult res = enterSuperstate(d, l);
                 done.addAll(res.getDoneNodes());
                 leaves_1.addAll(res.getLiveNodes());
             }
-            this.conf.add(d);
+            conf.add(d);
+            leaves.clear();
+            leaves.addAll(leaves_1);
         }
-        leaves.clear();
-
-        leaves.addAll(leaves_1);
 
         destination = t.getDestination();
         List<State> destination_Substates = new ArrayList<State>();
@@ -282,30 +304,34 @@ public class SymbolicExecutionEngine{
             destination = destination.states.get(0);
             destination_Substates.add(destination);
         }
-        leaves_1.clear();
+        
         for(State d: destination_Substates)
         {
+            leaves_1.clear();
             for(SETNode l: leaves)
             {
                 SymbolicExecutionResult res = enterSubstate(d, l);
                 done.addAll(res.getDoneNodes());
                 leaves_1.addAll(res.getLiveNodes());
             }
-            this.conf.add(d);
-        }
-        if(!destination_Substates.isEmpty())
-        {
+            conf.add(d);
             leaves.clear();
 
             leaves.addAll(leaves_1);
         }
+       /* if(!destination_Substates.isEmpty())
+        {
+            leaves.clear();
+
+            leaves.addAll(leaves_1);
+        }*/
         SymbolicExecutionResult res = new SymbolicExecutionResult();
 
         res.setDoneNodes(done);
         res.setLiveNodes(leaves);
         return res;
     }
-    public SymbolicExecutionResult executeStatement(Statement s, List<SETNode> leaves)
+    public static SymbolicExecutionResult executeStatement(Statement s, List<SETNode> leaves)
     {
         SymbolicExecutionResult res = new SymbolicExecutionResult();
         if(s instanceof InstructionStatement)
@@ -334,11 +360,11 @@ public class SymbolicExecutionEngine{
         }
         else
         {
-            res.setDoneNodes(leaves);
+            res.setLiveNodes(leaves);
         }
         return res;
     }
-    public  SymbolicExecutionResult executeBlock(Statement block, SETNode leaf)
+    public static SymbolicExecutionResult executeBlock(Statement block, SETNode leaf)
     {
         SymbolicExecutionResult res = new SymbolicExecutionResult();
         List<SETNode> leaves = new ArrayList<SETNode>();
@@ -367,7 +393,7 @@ public class SymbolicExecutionEngine{
         res.setLiveNodes(leaves);
         return res;
     }
-    public  SymbolicExecutionResult executeInstruction(Statement i, SETNode leaf)
+    public static SymbolicExecutionResult executeInstruction(Statement i, SETNode leaf)
     {
         //SETNode l = new DecisionNode();
         List<SETNode> done = new ArrayList<SETNode>();
@@ -396,7 +422,7 @@ public class SymbolicExecutionEngine{
         res.setLiveNodes(leaves);
         return res;
     }
-    public Expression sym_eval(Expression e, SETNode leaf)
+    public static Expression sym_eval(Expression e, SETNode leaf)
     {
         Expression expr;
 
@@ -447,7 +473,7 @@ public class SymbolicExecutionEngine{
         }
         return null;
     }
-    public List<Object> backtrack(Expression e , SETNode leaf)
+    public static List<Object> backtrack(Expression e , SETNode leaf)
     {
         if(leaf instanceof InstructionNode)
         {
@@ -483,7 +509,7 @@ public class SymbolicExecutionEngine{
             }
         }
     }
-    public SymbolicExecutionResult executeIf(Statement i, SETNode leaf)
+    public static SymbolicExecutionResult executeIf(Statement i, SETNode leaf)
     {
         List<SETNode> done = new ArrayList<SETNode>();
         List<SETNode> leaves = new ArrayList<SETNode>();

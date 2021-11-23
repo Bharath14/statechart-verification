@@ -15,7 +15,11 @@ statechart sc
 
 
   exit  : {} 
-
+  
+  functions 
+  {
+    input<||>() : int;
+  }
 
   state s1 
   {
@@ -29,7 +33,7 @@ statechart sc
   {
     entry : 
     {
-      switch_status := input<||>();
+      switch_status :=  input<||>();
     } 
 
     exit  : {} 

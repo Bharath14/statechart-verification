@@ -7,7 +7,7 @@ import ast.*;
 public class DecisionNode extends SETNode{
     
     //public final ast.Expression;
-    public SymbolicExpression value;
+    public final SymbolicExpression value;
     
     public DecisionNode(Expression value, SETNode leaf){
         super(leaf);
