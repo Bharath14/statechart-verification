@@ -27,9 +27,7 @@ statechart sc
 
   state s2 
   {
-    entry : {
-      switch_status := 1;
-    } 
+    entry : {} 
 
     exit  : {} 
 

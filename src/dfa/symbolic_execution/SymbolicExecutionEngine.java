@@ -22,7 +22,7 @@ public class SymbolicExecutionEngine{
     private final Statechart statechart;
     private static Integer max_depth ;
     private static Integer max_tree_depth;
-    private static List<State> conf = new ArrayList<State>(); 
+    private static Set<State> conf = new LinkedHashSet<State>(); 
 
     public SymbolicExecutionEngine(Statechart statechart, Integer md){
             this.statechart = statechart;
@@ -81,7 +81,7 @@ public class SymbolicExecutionEngine{
         return all_states;
     }
 
-    public static Set<Transition> compute_outts(List<State> conf, List<Transition> all_ts)
+    public static Set<Transition> compute_outts(Set<State> conf, List<Transition> all_ts)
     {
         Set<Transition> out_ts = new LinkedHashSet<Transition>();
         for(Transition tr :all_ts)
@@ -198,7 +198,8 @@ public class SymbolicExecutionEngine{
             }
             //leaves = leaves_temp2;
             out_ts = compute_outts(conf, all_ts);
-            
+            leaves.clear();
+            //System.out.println(leaves_temp2);
             for(SETNode leaf: leaves_temp2)
             {
                 System.out.println("treedepth:");
@@ -265,7 +266,7 @@ public class SymbolicExecutionEngine{
         }
         for(SETNode l : leaves)
         {
-            System.out.println("t.guard:");
+            System.out.println("t.action:");
             SymbolicExecutionResult res = executeBlock(t.action, l);
             done.addAll(res.getDoneNodes());
             leaves_1.addAll(res.getLiveNodes());
@@ -381,6 +382,10 @@ public class SymbolicExecutionEngine{
                 res = executeStatement(s, leaves);
                 done.addAll(res.getDoneNodes());
                 leaves = res.getLiveNodes();
+            }
+            if(statementlist == null)
+            {
+                res.setLiveNodes(leaves);
             }
         }
         else

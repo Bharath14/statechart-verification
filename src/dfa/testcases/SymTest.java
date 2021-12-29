@@ -106,7 +106,7 @@ public class SymTest{
     //SymbolicExecutionEngine symbolictest = new SymbolicExecutionEngine(statechart, 8);
     SymbolicExecutionResult res = new SymbolicExecutionResult();
     //symbolictest.execute();
-    SymbolicExecutionEngine.set_maxDepth(21, 30);
+    SymbolicExecutionEngine.set_maxDepth(23, 30);
     res.setDoneNodes(SymbolicExecutionEngine.execute(statechart));
 
     System.out.println(res.getDoneNodes());
