@@ -16,6 +16,7 @@ A Formal Specification Language Based on Statecharts
 
    Download Z3 package from https://github.com/Z3Prover/z3
 
+
    python scripts/mk_make.py
    cd build
    make
